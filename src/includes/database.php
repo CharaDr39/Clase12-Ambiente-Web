@@ -29,12 +29,12 @@ class Database {
 
         try {
             $dsn = "mysql:host=". $this->host . ";dbname=" . $this->database_name . ";charset=utf8";
-            $this->connection = new PDO($dsn,$this->username,$this->username);
+            $this->connection = new PDO($dsn, $this->username, $this->password);
             $this->connection->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
             $this->connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         }catch(PDOException $exception) {
             error_log("Error de conexion: " . $exception->getMessage());
-            throw new Exception("Error al conectar a la base de datos");
+            throw new Exception("Error al conectar a la base de datos: " . $exception->getMessage());
         }
 
         return $this->connection;

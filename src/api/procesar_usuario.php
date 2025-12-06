@@ -1,10 +1,11 @@
 <?php
     require_once("../includes/database.php"); 
+    require_once("../models/usuario.php");
 
       if($_SERVER['REQUEST_METHOD'] === 'POST'){
         $id = $_POST['usuario_id'];
         $name= $_POST['nombre'];
-        $usuario =  $_POST['usuario'];
+        $user =  $_POST['usuario'];
         $email =  $_POST['email'];
         $pass =  $_POST['password'];
         $confirm =  $_POST['confirm'];
@@ -20,91 +21,41 @@
         }else {
             $pass_hash = password_hash($pass, PASSWORD_DEFAULT);
 
-            if(!empty($id)){
-                //update
+            
                 try {
                     $database = new Database();
                     $db = $database->getConnection();
 
-                    $sql = "UPDATE usuarios
-                    SET nombre = :nombre, usuario = :usuario, correo =:correo, rol=:rol, estado=:estado" .
-                     (!empty($pass) ? ", clave = :clave" : "" ) . "
-                    WHERE id_usuario = :id";
+                    $usuario = new Usuario($db);
 
-                    $name = htmlspecialchars(strip_tags($name));
-                    $usuario = htmlspecialchars(strip_tags($usuario));
-                    $email = htmlspecialchars(strip_tags($email));
-                    $rol = htmlspecialchars(strip_tags($rol));
-                    $estado = htmlspecialchars(strip_tags($estado));
-                    $pass_hash = htmlspecialchars(strip_tags($pass_hash));
-                    $id = htmlspecialchars(strip_tags($id));
+                    $usuario->nombre = htmlspecialchars(strip_tags($name));
+                    $usuario->usuario = htmlspecialchars(strip_tags($user));
+                    $usuario->correo = htmlspecialchars(strip_tags($email));
+                    $usuario->rol = htmlspecialchars(strip_tags($rol));
+                    $usuario->estado = htmlspecialchars(strip_tags($estado));
+                    $usuario->clave = htmlspecialchars(strip_tags($pass_hash));
+                    $usuario->id_usuario = htmlspecialchars(strip_tags($id));
+                    
 
-                    $stmt = $db->prepare($sql);
-                    if(!empty($pass)){
-                        $stmt->bindParam(':nombre',$name);
-                        $stmt->bindParam(':usuario',$usuario);
-                        $stmt->bindParam(':correo',$email);
-                        $stmt->bindParam(':rol',$rol);
-                        $stmt->bindParam(':estado',$estado);
-                        $stmt->bindParam(':clave',$pass_hash);
-                        $stmt->bindParam('id',$id);
+                    if(!empty($id)){
+                        if($usuario->actualizarUsurio()){
+                            echo "Usuario actualizado correctamente";
+                        }else{
+                            echo "Error, usuario no actualizado";
+                        }
                     }else{
-                        $stmt->bindParam(':nombre',$name);
-                        $stmt->bindParam(':usuario',$usuario);
-                        $stmt->bindParam(':correo',$email);
-                        $stmt->bindParam(':rol',$rol);
-                        $stmt->bindParam(':estado',$estado);
-                        $stmt->bindParam('id',$id);
-                    }
+                        if($usuario->crearUsuario()){
+                            echo "Usuario creado correctamente";
+                        }else{
+                         echo "Error, el usuario no se pudo crear.";
+                        }
 
-                    if($stmt->execute()){
-                        echo "Usuario actualizado correctamente";
-                    }else{
-                         echo "Error, usuario no actualizado";
                     }
+                    
                 }catch(Exception $e){
-                    error_log("Error al actualizar el usuario: " . $e->getMessage());
-                    echo "Error al actualizar el usuario: " . $e->getMessage();
+                    error_log("Error de conexion con la base de datos: " . $e->getMessage());
+                    echo "Error de conexion con la base de datos: " . $e->getMessage();
                 }
-                
-                
-            }else{
-                //CREATE->INSERT de un usuario
-                try{
-                    $database = new Database();
-                    $db = $database->getConnection();
-                    $sql = 'INSERT INTO usuarios (nombre, usuario, clave, correo, rol, estado) 
-                    VALUES (:nombre,:usuario,:clave,:correo,:rol,:estado)';
-
-                    $name = htmlspecialchars(strip_tags($name));
-                    $usuario = htmlspecialchars(strip_tags($usuario));
-                    $email = htmlspecialchars(strip_tags($email));
-                    $rol = htmlspecialchars(strip_tags($rol));
-                    $estado = htmlspecialchars(strip_tags($estado));
-                    $pass_hash = htmlspecialchars(strip_tags($pass_hash));
-
-                    $stmt = $db->prepare($sql);
-
-                    $stmt->bindParam(':nombre',$name);
-                    $stmt->bindParam(':usuario',$usuario);
-                    $stmt->bindParam(':correo',$email);
-                    $stmt->bindParam(':rol',$rol);
-                    $stmt->bindParam(':estado',$estado);
-                    $stmt->bindParam(':clave',$pass_hash);
-
-                    if($stmt->execute()){
-                        echo "Usuario creado correctamente";
-                    }else{
-                        echo "Error, el usuario no se pudo crear.";
-                    }
-
-                }catch(Exception $e){
-                    error_log("Error al crear usuario: " . $e->getMessage());
-                    echo "Error al crear usuario: " . $e->getMessage();
-
-                }
-                
-            }    
         }
         exit();
    }

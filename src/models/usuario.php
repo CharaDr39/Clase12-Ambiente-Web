@@ -45,5 +45,65 @@ class Usuario{
 
         return $stmt->fetchAll();
     }
+
+    /** 
+     * Crear un nuevo usuario
+     */
+
+    public function crearUsuario(){
+        $sql = 'INSERT INTO usuarios (nombre, usuario, clave, correo, rol, estado) 
+                    VALUES (:nombre,:usuario,:clave,:correo,:rol,:estado)';
+
+        $stmt = $this->conn->prepare($sql);
+
+        $stmt->bindParam(':nombre',$this->nombre);
+        $stmt->bindParam(':usuario',$this->usuario);
+        $stmt->bindParam(':correo',$this->correo);
+        $stmt->bindParam(':rol',$this->rol);
+        $stmt->bindParam(':estado',$this->estado);
+        $stmt->bindParam(':clave',$this->clave);
+
+        if($stmt->execute()){
+            $this->id_usuario = $this->conn->lastInsertId();
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Actualizar Usuario
+     */
+
+    public function actualizarUsurio(){
+        $sql = "UPDATE usuarios
+                    SET nombre = :nombre, usuario = :usuario, correo =:correo, rol=:rol, estado=:estado" .
+                     (!empty($this->clave) ? ", clave = :clave" : "" ) . "
+                    WHERE id_usuario = :id";
+
+        $stmt = $this->conn->prepare($sql);
+        if(!empty($this->clave)){
+            $stmt->bindParam(':nombre',$this->nombre);
+            $stmt->bindParam(':usuario',$this->usuario);
+            $stmt->bindParam(':correo',$this->correo);
+            $stmt->bindParam(':rol',$this->rol);
+            $stmt->bindParam(':estado',$this->estado);
+            $stmt->bindParam(':clave',$this->clave);
+            $stmt->bindParam('id',$this->id_usuario);
+        }else{
+            $stmt->bindParam(':nombre',$this->nombre);
+            $stmt->bindParam(':usuario',$this->usuario);
+            $stmt->bindParam(':correo',$this->correo);
+            $stmt->bindParam(':rol',$this->rol);
+            $stmt->bindParam(':estado',$this->estado);
+            $stmt->bindParam('id',$this->id_usuario);
+        }
+
+         if($stmt->execute()){
+            return true;
+         }
+
+         return false;
+    }
 }
 ?>

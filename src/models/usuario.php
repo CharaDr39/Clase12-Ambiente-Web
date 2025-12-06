@@ -32,5 +32,18 @@ class Usuario{
 
         return $stmt->fetchAll();
     }
+
+    /**
+     * Obtener usuario por corrreo
+     */
+
+    public function obtenerPorCorreo($correo){
+        $sql = "SELECT nombre, clave, rol FROM usuarios WHERE correo = :correo";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(":correo",$correo);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
 }
 ?>

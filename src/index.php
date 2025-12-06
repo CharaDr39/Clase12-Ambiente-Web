@@ -1,6 +1,7 @@
 <?php
     session_start();
     require_once("includes/database.php"); 
+    require_once("models/usuario.php"); 
 
     if($_SERVER['REQUEST_METHOD'] === 'POST'){
         $email = $_POST['email'];
@@ -15,13 +16,10 @@
                 $database = new Database();
                 $db = $database->getConnection();
 
+                $usuario = new Usuario($db);
+            
                 //buscar si el correo existe en la base de datos
-                $sql = "SELECT nombre, clave, rol FROM usuarios WHERE correo = :correo";
-                $stmt = $db->prepare($sql);
-                $stmt->bindParam(":correo",$email);
-                $stmt->execute();
-
-                $resultado = $stmt->fetchAll();
+                $resultado = $usuario->obtenerPorCorreo($email);
 
                 if(count($resultado) ===1){
                     foreach($resultado as $usuario){

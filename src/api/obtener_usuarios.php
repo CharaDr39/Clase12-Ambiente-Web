@@ -1,15 +1,15 @@
 <?php
        require_once("../includes/database.php"); 
+       require_once("../models/usuario.php");
 
    
     try{
         $database = new Database();
         $db = $database->getConnection();
-        $query = "SELECT id_usuario,nombre,usuario,correo,rol,estado FROM usuarios";
-        $stmt = $db->prepare($query);
-        $stmt->execute();
+        
+        $usuario =  new Usuario($db);
 
-        $resultado = $stmt->fetchAll();
+        $resultado = $usuario->obtenerTodos();
 
         if($resultado && count($resultado)  >0){
             foreach($resultado as $usuario){
